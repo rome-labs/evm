@@ -1,0 +1,24 @@
+[package]
+name = "evm-runtime"
+version = "0.18.0"
+license = "Apache-2.0"
+authors = ["Wei Tang <hi@that.world>", "Parity Technologies <admin@parity.io>"]
+description = "SputnikVM - a Portable Blockchain Virtual Machine"
+repository = "https://github.com/sorpaas/rust-evm"
+keywords = ["no_std", "ethereum"]
+edition = "2018"
+
+[dependencies]
+evm-core = { version = "0.18", path = "../core", default-features = false }
+sha3 = { version = "0.8", default-features = false }
+codec = { package = "parity-scale-codec", version = "1.3", default-features = false, features = ["derive", "full"], optional = true }
+serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+serde_bytes = { version = "0.11.5", optional = true }
+borsh = { version = "0.9" }
+
+[features]
+default = ["std"]
+with-codec = ["codec"]
+with-serde = ["serde", "serde_bytes"]
+std = ["evm-core/std", "sha3/std"]
+tracing = ["evm-core/tracing"]
