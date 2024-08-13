@@ -9,7 +9,7 @@
 	clippy::missing_panics_doc
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(not(feature = "tracing"), forbid(unused_imports))]
+#![forbid(unused_imports)]
 
 extern crate alloc;
 

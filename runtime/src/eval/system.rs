@@ -2,10 +2,6 @@ use core::cmp::min;
 use alloc::vec::Vec;
 use crate::{Runtime, ExitError, Handler, Capture, Transfer, ExitReason, CreateScheme, CallScheme, Context, ExitSucceed, ExitFatal, H160, H256, U256};
 use super::Control;
-use evm_core::event;
-
-#[cfg(feature = "tracing")]
-use evm_core::{Event, SStoreTrace, SLoadTrace, tracing::with as with};
 
 
 pub fn sha3<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
@@ -189,26 +185,11 @@ pub fn sload<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	let value = handler.storage(runtime.context.address, index);
 	push_u256!(runtime, value);
 
-	event!(Event::SLoad(
-		SLoadTrace{
-			address: runtime.context.address,
-			index,
-			value
-		}
-	));
-
 	Control::Continue
 }
 
 pub fn sstore<H: Handler>(runtime: &mut Runtime, handler: &mut H) -> Control<H> {
 	pop_u256!(runtime, index, value);
-
-	event!(Event::SStore( SStoreTrace{
-		address: runtime.context.address,
-		index,
-		value
-		}
-	));
 
 	match handler.set_storage(runtime.context.address, index, value) {
 		Ok(()) => Control::Continue,
@@ -294,7 +275,7 @@ pub fn create<H: Handler>(
 
 	match handler.create(runtime.context.address, scheme, value, code, None) {
 		Capture::Exit((reason, address, _return_data)) => {
-			save_created_address(runtime, reason, address, handler)
+			save_created_address(runtime, reason, address)
 		},
 		Capture::Trap(interrupt) => {
 			// The created contract's address will be push by the method save_created_address()
@@ -380,7 +361,7 @@ pub fn call<'config, H: Handler>(
 
 	match handler.call(to.into(), transfer, input, gas, scheme == CallScheme::StaticCall, context) {
 		Capture::Exit((reason, return_data)) => {
-			save_return_value(runtime, reason, return_data, handler)
+			save_return_value(runtime, reason, return_data)
 		},
 		Capture::Trap(interrupt) => {
 			// The result of the call opcode will be push by the method save_return_value()
@@ -395,8 +376,6 @@ pub fn save_created_address<'config, H: Handler>(
 	runtime: &mut Runtime,
 	reason : ExitReason,
 	address: Option<H160>,
-	// return_data : Vec<u8>,
-	_handler: & H
 ) -> Control<H> {
 	// runtime.return_data_buffer = return_data;
 	let create_address: H256 = address.map(|a| a.into()).unwrap_or_default();
@@ -428,7 +407,6 @@ pub fn save_return_value<'config, H: Handler>(
 	runtime: &mut Runtime,
 	reason : ExitReason,
 	return_data : Vec<u8>,
-	_handler: & H
 	) -> Control<H> {
 
 	pop_u256!(runtime, out_offset, out_len);
