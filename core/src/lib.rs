@@ -25,8 +25,6 @@ mod eval;
 mod utils;
 mod primitive_types;
 mod context;
-#[cfg(feature = "tracing")]
-pub mod tracing;
 
 pub use crate::memory::Memory;
 pub use crate::stack::Stack;
@@ -38,24 +36,6 @@ pub use crate::context::{Context, CreateScheme, CallScheme, Transfer};
 
 use alloc::vec::Vec;
 use crate::eval::{eval, Control};
-
-#[cfg(feature = "tracing")]
-pub use crate::tracing::*;
-
-
-#[macro_export]
-#[cfg(feature = "tracing")]
-macro_rules! event {
-    ($x:expr) => {
-         with(|listener| listener.event($x));
-    };
-}
-
-#[macro_export]
-#[cfg(not(feature = "tracing"))]
-macro_rules! event {
-	($x:expr) => {}
-}
 
 /// Core execution layer for EVM.
 #[cfg_attr(feature = "with-codec", derive(codec::Encode, codec::Decode))]
@@ -171,16 +151,6 @@ impl Machine {
 				}
 			};
 
-			event!(Event::Step(
-				StepTrace {
-					context: _context,
-					opcode,
-					position: &self.position,
-					stack: &self.stack,
-					memory: &self.memory,
-				}
-			));
-
 			if let Err(error) = pre_validate(opcode, &self.stack()) {
 				let reason = ExitReason::from(error);
 				self.exit(reason);
@@ -205,13 +175,6 @@ impl Machine {
 					Err(Capture::Trap(opcode))
 				},
 			};
-
-			event!(Event::StepResult (StepResultTrace{
-				result: &result,
-				return_value: &self.return_value(),
-				stack: &self.stack,
-				memory: &self.memory
-			}));
 
 			if let Err(capture) = result {
 				return (step, capture)
