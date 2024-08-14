@@ -132,6 +132,8 @@ pub enum ExitError {
 
 	/// Indicates that a STATICCALL tried to change state
 	StaticModeViolation,
+	/// unknown EVM opcode
+	IncompatibleVersionEVM,
 }
 
 impl From<ExitError> for ExitReason {
