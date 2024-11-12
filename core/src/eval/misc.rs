@@ -157,6 +157,12 @@ pub fn push(state: &mut Machine, n: usize, position: usize) -> Control {
 	Control::Continue(1 + n)
 }
 
+pub fn push0(state: &mut Machine) -> Control {
+	push_u256!(state, U256::zero());
+	trace_op!("Push [@{}]: {}", state.stack.len() - 1, 0);
+	Control::Continue(1)
+}
+
 pub fn dup(state: &mut Machine, n: usize) -> Control {
 	if let Err(e) = state.stack.dup(n - 1) {
 		return Control::Exit(e.into());
