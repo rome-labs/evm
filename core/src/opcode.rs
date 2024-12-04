@@ -89,7 +89,8 @@ impl Opcode {
 	pub const MSIZE: Opcode = Opcode(0x59);
 	/// `JUMPDEST`
 	pub const JUMPDEST: Opcode = Opcode(0x5b);
-
+	/// `MCOPY`
+	pub const MCOPY: Opcode = Opcode(0x5e);
 	/// `PUSHn`
 	pub const PUSH0: Opcode = Opcode(0x5f);
 	pub const PUSH1: Opcode = Opcode(0x60);
@@ -216,6 +217,10 @@ impl Opcode {
 	pub const SLOAD: Opcode = Opcode(0x54);
 	/// `SSTORE`
 	pub const SSTORE: Opcode = Opcode(0x55);
+	/// `TLOAD`
+	pub const TLOAD: Opcode = Opcode(0x5c);
+	/// `TSTORE`
+	pub const TSTORE: Opcode = Opcode(0x5d);
 	/// `GAS`
 	pub const GAS: Opcode = Opcode(0x5a);
 	/// `LOGn`
