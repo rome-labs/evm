@@ -1,4 +1,4 @@
-use core::cmp::min;
+use core::cmp::{min, max};
 use super::Control;
 use crate::{Machine, ExitError, ExitSucceed, ExitFatal, ExitRevert, H256, U256};
 
@@ -89,6 +89,23 @@ pub fn mstore(state: &mut Machine) -> Control {
 	let index = as_usize_or_fail!(index);
 	try_or_fail!(state.memory.resize_offset(index, 32));
 	match state.memory.set(index, &value[..], Some(32)) {
+		Ok(()) => Control::Continue(1),
+		Err(e) => Control::Exit(e.into()),
+	}
+}
+
+pub fn mcopy(state: &mut Machine) -> Control {
+	pop_u256!(state, dst_offset, src_offset, size);
+	trace_op!("MCopy: {}", size);
+
+	let dst_offset = as_usize_or_fail!(dst_offset);
+	let src_offset = as_usize_or_fail!(src_offset);
+	let size = as_usize_or_fail!(size);
+
+	try_or_fail!(state.memory.resize_offset(max(src_offset, dst_offset), size));
+
+	let value = state.memory.get(src_offset, size);
+	match state.memory.set(dst_offset, &value, Some(size)) {
 		Ok(()) => Control::Continue(1),
 		Err(e) => Control::Exit(e.into()),
 	}

@@ -32,6 +32,7 @@ pub trait Handler {
 	fn valids(&self, address: H160) -> Vec<u8>;
 	/// Get storage value of address at index.
 	fn storage(&self, address: H160, index: U256) -> U256;
+	fn transient_storage(&self, address: H160, index: U256) -> U256;
 
 	/// Get the gas left value.
 	fn gas_left(&self) -> U256;
@@ -53,9 +54,10 @@ pub trait Handler {
 	fn block_gas_limit(&self) -> U256;
 	/// Get environmental chain ID.
 	fn chain_id(&self) -> U256;
-
 	/// Set storage value of address at index.
 	fn set_storage(&mut self, address: H160, index: U256, value: U256) -> Result<(), ExitError>;
+	/// Set transient storage value of address at index.
+	fn set_transient_storage(&mut self, address: H160, index: U256, value: U256) -> Result<(), ExitError>;
 	/// Create a log owned by address with given topics and data.
 	fn log(&mut self, address: H160, topcis: Vec<H256>, data: Vec<u8>) -> Result<(), ExitError>;
 	/// Mark an address to be deleted, with funds transferred to target.
