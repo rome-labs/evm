@@ -86,7 +86,6 @@ macro_rules! impl_fixed_hash_borsh {
 		}
 
 		impl borsh::BorshDeserialize for $name {
-
 			fn deserialize_reader<R: Read>(reader: &mut R) -> std::io::Result<Self> {
 				const LEN: usize = core::mem::size_of::<$name>();
 				let mut buf = [0_u8; LEN];
@@ -119,7 +118,6 @@ impl borsh::BorshSerialize for U256 {
 
 impl borsh::BorshDeserialize for U256 {
 	fn deserialize_reader<R: Read>(reader: &mut R) -> std::io::Result<Self> {
-
 		const LEN: usize = core::mem::size_of::<U256>();
 		let mut buf = [0_u8; LEN];
 		let read_len = reader.read(&mut buf)?;
