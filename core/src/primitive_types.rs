@@ -1,20 +1,16 @@
 #![allow(clippy::use_self)]
 
-use std::convert::TryInto;
 use std::io::{Read, Write};
-// use borsh::{BorshDeserialize, BorshSerialize};
 use fixed_hash::{construct_fixed_hash, impl_fixed_hash_conversions};
 use uint::{construct_uint};
 
 
 construct_fixed_hash! {
 	/// Fixed-size uninterpreted hash type with 20 bytes (160 bits) size.
-	// #[derive(BorshSerialize, BorshDeserialize)]
 	pub struct H160(20);
 }
 construct_fixed_hash! {
 	/// Fixed-size uninterpreted hash type with 32 bytes (256 bits) size.
-	// #[derive(BorshSerialize, BorshDeserialize)]
 	pub struct H256(32);
 }
 
@@ -23,7 +19,6 @@ impl_fixed_hash_conversions!(H256, H160);
 
 construct_uint! {
 	/// 256-bit unsigned integer.
-	// #[derive(BorshSerialize, BorshDeserialize)]
 	pub struct U256(4);
 }
 
@@ -79,7 +74,6 @@ impl core::convert::TryFrom<U512> for U256 {
 
 
 /// Add Serde serialization support to a fixed-sized hash type created by `construct_fixed_hash!`.
-
 #[macro_export]
 macro_rules! impl_fixed_hash_borsh {
 	($name: ident) => {
@@ -94,14 +88,11 @@ macro_rules! impl_fixed_hash_borsh {
 		impl borsh::BorshDeserialize for $name {
 
 			fn deserialize_reader<R: Read>(reader: &mut R) -> std::io::Result<Self> {
-
-				let bytes_len = core::mem::size_of::<$name>();
-				let mut vec = vec![0; bytes_len];
-				let mut buf = vec.as_mut_slice();
-
+				const LEN: usize = core::mem::size_of::<$name>();
+				let mut buf = [0_u8; LEN];
 				let read_len = reader.read(&mut buf)?;
 
-				if read_len < bytes_len {
+				if read_len < LEN {
 					return Err(borsh::io::Error::new(
 						borsh::io::ErrorKind::InvalidInput,
 						"ERROR_UNEXPECTED_LENGTH_OF_INPUT"
@@ -117,7 +108,6 @@ macro_rules! impl_fixed_hash_borsh {
 impl_fixed_hash_borsh!(H160);
 impl_fixed_hash_borsh!(H256);
 
-
 impl borsh::BorshSerialize for U256 {
 	fn serialize<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
 		let buffer: [u8; 32] = unsafe { core::mem::transmute_copy(self) };
@@ -125,27 +115,23 @@ impl borsh::BorshSerialize for U256 {
 
 		Ok(())
 	}
-
 }
 
 impl borsh::BorshDeserialize for U256 {
 	fn deserialize_reader<R: Read>(reader: &mut R) -> std::io::Result<Self> {
 
-		let bytes_len = core::mem::size_of::<U256>();
-		let mut vec = vec![0; bytes_len];
-		let mut buf = vec.as_mut_slice();
-
+		const LEN: usize = core::mem::size_of::<U256>();
+		let mut buf = [0_u8; LEN];
 		let read_len = reader.read(&mut buf)?;
 
-		if read_len < bytes_len {
+		if read_len < LEN {
 			return Err(borsh::io::Error::new(
 				borsh::io::ErrorKind::InvalidInput,
 				"ERROR_UNEXPECTED_LENGTH_OF_INPUT"
 			));
 		}
 
-		let arr: [u8; 32] = buf.try_into().unwrap();
-		let value: U256 = unsafe { core::mem::transmute(arr) };
+		let value: U256 = unsafe { core::mem::transmute(buf) };
 
 		Ok(value)
 	}
