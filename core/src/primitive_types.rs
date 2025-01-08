@@ -1,15 +1,18 @@
 #![allow(clippy::use_self)]
 
+use borsh::{BorshDeserialize, BorshSerialize};
 use fixed_hash::{construct_fixed_hash, impl_fixed_hash_conversions};
 use uint::{construct_uint};
 
 
 construct_fixed_hash! {
 	/// Fixed-size uninterpreted hash type with 20 bytes (160 bits) size.
+	#[derive(BorshSerialize, BorshDeserialize)]
 	pub struct H160(20);
 }
 construct_fixed_hash! {
 	/// Fixed-size uninterpreted hash type with 32 bytes (256 bits) size.
+	#[derive(BorshSerialize, BorshDeserialize)]
 	pub struct H256(32);
 }
 
@@ -18,6 +21,7 @@ impl_fixed_hash_conversions!(H256, H160);
 
 construct_uint! {
 	/// 256-bit unsigned integer.
+	#[derive(BorshSerialize, BorshDeserialize)]
 	pub struct U256(4);
 }
 
@@ -73,144 +77,110 @@ impl core::convert::TryFrom<U512> for U256 {
 
 
 /// Add Serde serialization support to a fixed-sized hash type created by `construct_fixed_hash!`.
-#[macro_export]
-macro_rules! impl_fixed_hash_borsh {
-	($name: ident) => {
-		impl borsh::BorshSerialize for $name {
-			fn serialize<W: borsh::maybestd::io::Write>(&self, writer: &mut W) -> borsh::maybestd::io::Result<()> {
-				writer.write_all(&self.0)?;
 
-				Ok(())
-			}
-		
-			fn u8_slice(slice: &[Self]) -> Option<&[u8]>
-			{
-				let (_, data, _) = unsafe { slice.align_to::<u8>() };
-				Some(data)
-			}
-		}
-		
-		impl borsh::BorshDeserialize for $name {
-			fn deserialize(buf: &mut &[u8]) -> borsh::maybestd::io::Result<Self> {
-				let bytes_len = core::mem::size_of::<$name>();
+// #[macro_export]
+// macro_rules! impl_fixed_hash_borsh {
+// 	($name: ident) => {
+// 		impl borsh::BorshSerialize for $name {
+// 			fn serialize<W: Write>(&self, writer: &mut W) -> std::io::Result<()> {
+//         		writer.write_all(&self.0)?;
+//
+// 				Ok(())
+//     		}
+// 		}
+//
+// 		impl borsh::BorshDeserialize for $name {
+//
+// 			fn deserialize_reader<R: Read>(reader: &mut R) -> std::io::Result<Self> {
+//
+// 				const bytes_len = core::mem::size_of::<$name>();
+// 				let mut buf = [0; bytes_len];
+// 				let read_len = reader.read(&mut buf)?;
+//
+// 				if read_len < bytes_len {
+// 					return Err(borsh::io::Error::new(
+// 						borsh::io::ErrorKind::InvalidInput,
+// 						"ERROR_UNEXPECTED_LENGTH_OF_INPUT"
+// 					));
+// 				}
+//
+// 				Ok(Self::from_slice(buf))
+//     		}
+// 		}
+// 	};
+// }
 
-				if buf.len() < bytes_len {
-					return Err(borsh::maybestd::io::Error::new(
-						borsh::maybestd::io::ErrorKind::InvalidInput,
-						"ERROR_UNEXPECTED_LENGTH_OF_INPUT"
-					));
-				}
+// impl_fixed_hash_borsh!(H160);
+// impl_fixed_hash_borsh!(H256);
 
-				let (front, rest) = buf.split_at(bytes_len);
-				*buf = rest;
-
-				Ok(Self::from_slice(front))
-			}
-		
-			fn vec_from_bytes(len: u32, buf: &mut &[u8]) -> borsh::maybestd::io::Result<Option<borsh::maybestd::vec::Vec<Self>>> {
-				let bytes_len = core::mem::size_of::<$name>() * (len as usize);
-		
-				let mut vec = borsh::maybestd::vec::Vec::with_capacity(len as usize);
-		
-				let (front, rest) = buf.split_at(bytes_len);
-				*buf = rest;
-		
-				unsafe {
-					let ptr = vec.as_mut_ptr() as *mut u8;
-					ptr.copy_from_nonoverlapping(front.as_ptr(), bytes_len);
-		
-					vec.set_len(len as usize);
-				}
-		
-				Ok(Some(vec))
-			}
-		
-			fn copy_from_bytes(buf: &mut &[u8], out: &mut [Self]) -> borsh::maybestd::io::Result<bool> {
-				let bytes_len = core::mem::size_of::<$name>() * out.len();
-		
-				let (front, rest) = buf.split_at(bytes_len);
-				*buf = rest;
-		
-				let (_, out, _) = unsafe { out.align_to_mut::<u8>() };
-				out.copy_from_slice(front);
-		
-				Ok(true)
-			}
-		}
-	};
-}
-
-impl_fixed_hash_borsh!(H160);
-impl_fixed_hash_borsh!(H256);
-
-
-impl borsh::BorshSerialize for U256 {
-	fn serialize<W: borsh::maybestd::io::Write>(&self, writer: &mut W) -> borsh::maybestd::io::Result<()> {
-		let buffer: [u8; 32] = unsafe { core::mem::transmute_copy(self) };
-		writer.write_all(&buffer)?;
-
-		Ok(())
-	}
-
-	fn u8_slice(slice: &[Self]) -> Option<&[u8]>
-	{
-		let (_, data, _) = unsafe { slice.align_to::<u8>() };
-		Some(data)
-	}
-}
-
-impl borsh::BorshDeserialize for U256 {
-	fn deserialize(buf: &mut &[u8]) -> borsh::maybestd::io::Result<Self> {
-		let bytes_len = core::mem::size_of::<U256>();
-
-		if buf.len() < bytes_len {
-			return Err(borsh::maybestd::io::Error::new(
-				borsh::maybestd::io::ErrorKind::InvalidInput,
-				"ERROR_UNEXPECTED_LENGTH_OF_INPUT"
-			));
-		}
-
-		let (front, rest) = buf.split_at(bytes_len);
-		*buf = rest;
-
-		let mut data = [0_u8; 32];
-		data.copy_from_slice(front);
-
-		let value: U256 = unsafe { core::mem::transmute(data) };
-
-		Ok(value)
-	}
-
-	fn vec_from_bytes(len: u32, buf: &mut &[u8]) -> borsh::maybestd::io::Result<Option<borsh::maybestd::vec::Vec<Self>>> {
-		let bytes_len = core::mem::size_of::<U256>() * (len as usize);
-
-		let mut vec = borsh::maybestd::vec::Vec::with_capacity(len as usize);
-
-		let (front, rest) = buf.split_at(bytes_len);
-		*buf = rest;
-
-		unsafe {
-			let ptr = vec.as_mut_ptr() as *mut u8;
-			ptr.copy_from_nonoverlapping(front.as_ptr(), bytes_len);
-
-			vec.set_len(len as usize);
-		}
-
-		Ok(Some(vec))
-	}
-
-	fn copy_from_bytes(buf: &mut &[u8], out: &mut [Self]) -> borsh::maybestd::io::Result<bool> {
-		let bytes_len = core::mem::size_of::<U256>() * out.len();
-
-		let (front, rest) = buf.split_at(bytes_len);
-		*buf = rest;
-
-		let (_, out, _) = unsafe { out.align_to_mut::<u8>() };
-		out.copy_from_slice(front);
-
-		Ok(true)
-	}
-}
+//
+// impl borsh::BorshSerialize for U256 {
+// 	fn serialize<W: borsh::maybestd::io::Write>(&self, writer: &mut W) -> borsh::maybestd::io::Result<()> {
+// 		let buffer: [u8; 32] = unsafe { core::mem::transmute_copy(self) };
+// 		writer.write_all(&buffer)?;
+//
+// 		Ok(())
+// 	}
+//
+// 	fn u8_slice(slice: &[Self]) -> Option<&[u8]>
+// 	{
+// 		let (_, data, _) = unsafe { slice.align_to::<u8>() };
+// 		Some(data)
+// 	}
+// }
+//
+// impl borsh::BorshDeserialize for U256 {
+// 	fn deserialize(buf: &mut &[u8]) -> borsh::maybestd::io::Result<Self> {
+// 		let bytes_len = core::mem::size_of::<U256>();
+//
+// 		if buf.len() < bytes_len {
+// 			return Err(borsh::maybestd::io::Error::new(
+// 				borsh::maybestd::io::ErrorKind::InvalidInput,
+// 				"ERROR_UNEXPECTED_LENGTH_OF_INPUT"
+// 			));
+// 		}
+//
+// 		let (front, rest) = buf.split_at(bytes_len);
+// 		*buf = rest;
+//
+// 		let mut data = [0_u8; 32];
+// 		data.copy_from_slice(front);
+//
+// 		let value: U256 = unsafe { core::mem::transmute(data) };
+//
+// 		Ok(value)
+// 	}
+//
+// 	fn vec_from_bytes(len: u32, buf: &mut &[u8]) -> borsh::maybestd::io::Result<Option<borsh::maybestd::vec::Vec<Self>>> {
+// 		let bytes_len = core::mem::size_of::<U256>() * (len as usize);
+//
+// 		let mut vec = borsh::maybestd::vec::Vec::with_capacity(len as usize);
+//
+// 		let (front, rest) = buf.split_at(bytes_len);
+// 		*buf = rest;
+//
+// 		unsafe {
+// 			let ptr = vec.as_mut_ptr() as *mut u8;
+// 			ptr.copy_from_nonoverlapping(front.as_ptr(), bytes_len);
+//
+// 			vec.set_len(len as usize);
+// 		}
+//
+// 		Ok(Some(vec))
+// 	}
+//
+// 	fn copy_from_bytes(buf: &mut &[u8], out: &mut [Self]) -> borsh::maybestd::io::Result<bool> {
+// 		let bytes_len = core::mem::size_of::<U256>() * out.len();
+//
+// 		let (front, rest) = buf.split_at(bytes_len);
+// 		*buf = rest;
+//
+// 		let (_, out, _) = unsafe { out.align_to_mut::<u8>() };
+// 		out.copy_from_slice(front);
+//
+// 		Ok(true)
+// 	}
+// }
 
 
 impl U256 {
