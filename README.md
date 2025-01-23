@@ -47,4 +47,4 @@ $ cargo build --release --all
 
 ## License
 
-Apache 2.0
+[Apache 2.0](https://github.com/rome-protocol/evm/blob/master/LICENSE)
