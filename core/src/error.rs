@@ -94,15 +94,6 @@ impl From<ExitRevert> for ExitReason {
 	}
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "with-codec", derive(codec::Encode, codec::Decode))]
-#[cfg_attr(feature = "with-serde", derive(serde::Serialize, serde::Deserialize))]
-#[derive(borsh::BorshSerialize, borsh::BorshDeserialize)]
-pub enum PrecompiledError {
-	IvalidInput
-}
-
-
 /// Exit error reason.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "with-codec", derive(codec::Encode, codec::Decode))]
