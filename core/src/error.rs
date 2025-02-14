@@ -140,8 +140,6 @@ pub enum ExitError {
 	DelegateCallProhibited
 }
 
-
-
 impl From<ExitError> for ExitReason {
 	fn from(s: ExitError) -> Self {
 		Self::Error(s)
