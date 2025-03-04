@@ -136,6 +136,8 @@ pub enum ExitError {
 	IncompatibleVersionEVM(u8),
 	/// extern call error
 	ExtCallError,
+	/// transfer is not allowed
+	TransferProhibited,
 	/// Delegate call id prohibited for ExtCall
 	DelegateCallProhibited
 }
