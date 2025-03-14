@@ -134,6 +134,12 @@ pub enum ExitError {
 	StaticModeViolation,
 	/// unknown EVM opcode
 	IncompatibleVersionEVM(u8),
+	/// extern call error
+	ExtCallError,
+	/// transfer is not allowed
+	TransferProhibited,
+	/// Delegate call id prohibited for ExtCall
+	DelegateCallProhibited
 }
 
 impl From<ExitError> for ExitReason {
