@@ -327,7 +327,6 @@ pub fn call<'config, H: Handler>(
 		},
 	};
 
-	// https://app.zenhub.com/workspaces/solana-evm-6007c75a9dc141001100ccb8/issues/cyber-core/solana-program-library/132
 	// out_offset and out_len parameters will be read in save_return_value()
 	pop_u256!(runtime, in_offset, in_len/*, out_offset, out_len*/);
 	let in_offset = as_usize_or_fail!(in_offset);
