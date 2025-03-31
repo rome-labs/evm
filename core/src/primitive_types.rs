@@ -1,4 +1,5 @@
 #![allow(clippy::use_self)]
+#![allow(warnings)]
 
 use std::io::{Read, Write};
 use fixed_hash::{construct_fixed_hash, impl_fixed_hash_conversions};
