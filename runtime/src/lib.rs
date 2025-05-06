@@ -207,47 +207,6 @@ pub struct Config {
 pub const CONFIG: Config = Config::istanbul();
 
 impl Config {
-	/// Frontier hard fork configuration.
-	pub const fn frontier() -> Config {
-		Config {
-			gas_ext_code: 20,
-			gas_ext_code_hash: 20,
-			gas_balance: 20,
-			gas_sload: 50,
-			gas_sstore_set: 20000,
-			gas_sstore_reset: 5000,
-			refund_sstore_clears: 15000,
-			gas_suicide: 0,
-			gas_suicide_new_account: 0,
-			gas_call: 40,
-			gas_expbyte: 10,
-			gas_transaction_create: 21000,
-			gas_transaction_call: 21000,
-			gas_transaction_zero_data: 4,
-			gas_transaction_non_zero_data: 68,
-			sstore_gas_metering: false,
-			sstore_revert_under_stipend: false,
-			err_on_call_with_more_gas: true,
-			empty_considered_exists: true,
-			create_increase_nonce: false,
-			call_l64_after_gas: false,
-			stack_limit: 1024,
-			memory_limit: usize::max_value(),
-			call_stack_limit: 1024,
-			create_contract_limit: None,
-			call_stipend: 2300,
-			has_delegate_call: false,
-			has_create2: false,
-			has_revert: false,
-			has_return_data: false,
-			has_bitwise_shifting: false,
-			has_chain_id: false,
-			has_self_balance: false,
-			has_ext_code_hash: false,
-			estimate: false,
-		}
-	}
-
 	/// Istanbul hard fork configuration.
 	pub const fn istanbul() -> Config {
 		Config {
