@@ -3,6 +3,7 @@
 use crate::U256;
 use crate::utils::{Sign, I256};
 
+/// Signed less-than comparison
 pub fn slt(op1: U256, op2: U256) -> U256 {
 	let op1: I256 = op1.into();
 	let op2: I256 = op2.into();
@@ -14,6 +15,7 @@ pub fn slt(op1: U256, op2: U256) -> U256 {
 	}
 }
 
+/// Signed greater-than comparison
 pub fn sgt(op1: U256, op2: U256) -> U256 {
 	let op1: I256 = op1.into();
 	let op2: I256 = op2.into();
@@ -25,6 +27,7 @@ pub fn sgt(op1: U256, op2: U256) -> U256 {
 	}
 }
 
+/// Is-zero comparison
 pub fn iszero(op1: U256) -> U256 {
 	if op1 == U256::zero() {
 		U256::one()
@@ -33,10 +36,12 @@ pub fn iszero(op1: U256) -> U256 {
 	}
 }
 
+/// Bitwise NOT operation
 pub fn not(op1: U256) -> U256 {
 	!op1
 }
 
+/// Retrieve single byte from word
 pub fn byte(op1: U256, op2: U256) -> U256 {
 	let i = op1.as_usize();
 	if i >= 32 {
@@ -48,6 +53,7 @@ pub fn byte(op1: U256, op2: U256) -> U256 {
 	}
 }
 
+/// Left shift operation
 pub fn shl(shift: U256, value: U256) -> U256 {
 	if value == U256::zero() || shift >= U256::from(256) {
 		U256::zero()
@@ -56,6 +62,7 @@ pub fn shl(shift: U256, value: U256) -> U256 {
 	}
 }
 
+/// Right shift operation
 pub fn shr(shift: U256, value: U256) -> U256 {
 	if value == U256::zero() || shift >= U256::from(256) {
 		U256::zero()
@@ -64,6 +71,7 @@ pub fn shr(shift: U256, value: U256) -> U256 {
 	}
 }
 
+/// Arithmetic (signed) right shift operation
 pub fn sar(shift: U256, value: U256) -> U256 {
 	let value = I256::from(value);
 

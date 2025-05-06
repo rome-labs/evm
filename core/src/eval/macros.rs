@@ -29,6 +29,7 @@ macro_rules! pop_u256 {
 	);
 }
 
+/// push H256 to stack
 macro_rules! push {
 	( $machine:expr, $( $x:expr ),* ) => (
 		$(
@@ -40,6 +41,7 @@ macro_rules! push {
 	)
 }
 
+/// push U256 to stack
 macro_rules! push_u256 {
 	( $machine:expr, $( $x:expr ),* ) => (
 		$(
@@ -51,6 +53,7 @@ macro_rules! push_u256 {
 	)
 }
 
+/// call fn(v)
 macro_rules! op1_u256_fn {
 	( $machine:expr, $op:path ) => (
 		{
@@ -63,6 +66,7 @@ macro_rules! op1_u256_fn {
 	)
 }
 
+/// compare v1, v2
 macro_rules! op2_u256_bool_ref {
 	( $machine:expr, $op:ident ) => (
 		{
@@ -79,6 +83,7 @@ macro_rules! op2_u256_bool_ref {
 	)
 }
 
+/// v1.fn(v2)
 macro_rules! op2_u256 {
 	( $machine:expr, $op:ident ) => (
 		{
@@ -91,6 +96,7 @@ macro_rules! op2_u256 {
 	)
 }
 
+/// (a, b) = v1.fn(v2),
 macro_rules! op2_u256_tuple {
 	( $machine:expr, $op:ident ) => (
 		{
@@ -103,6 +109,7 @@ macro_rules! op2_u256_tuple {
 	)
 }
 
+/// fn(v1, v2)
 macro_rules! op2_u256_fn {
 	( $machine:expr, $op:path ) => (
 		{
@@ -115,6 +122,7 @@ macro_rules! op2_u256_fn {
 	)
 }
 
+/// fn(v1, v2, v3)
 macro_rules! op3_u256_fn {
 	( $machine:expr, $op:path ) => (
 		{
@@ -127,6 +135,7 @@ macro_rules! op3_u256_fn {
 	)
 }
 
+/// cast U256 to usize
 macro_rules! as_usize_or_fail {
 	( $v:expr ) => {
 		{

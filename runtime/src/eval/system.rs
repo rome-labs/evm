@@ -3,7 +3,7 @@ use alloc::vec::Vec;
 use crate::{Runtime, ExitError, Handler, Capture, Transfer, ExitReason, CreateScheme, CallScheme, Context, ExitSucceed, ExitFatal, H160, H256, U256};
 use super::Control;
 
-
+/// Compute Keccak-256 hash
 pub fn sha3<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop_u256!(runtime, from, len);
 	let from = as_usize_or_fail!(from);
@@ -22,12 +22,15 @@ pub fn sha3<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	Control::Continue
 }
 
+
+// Get the chain ID
 pub fn chainid<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push_u256!(runtime, handler.chain_id());
 
 	Control::Continue
 }
 
+/// Get address of currently executing account
 pub fn address<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	let ret = H256::from(runtime.context.address);
 	push!(runtime, ret);
@@ -35,6 +38,7 @@ pub fn address<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	Control::Continue
 }
 
+/// Get balance of the given account
 pub fn balance<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop!(runtime, address);
 	push_u256!(runtime, handler.balance(address.into()));
@@ -42,18 +46,21 @@ pub fn balance<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	Control::Continue
 }
 
+/// Get balance of currently executing account
 pub fn selfbalance<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push_u256!(runtime, handler.balance(runtime.context.address));
 
 	Control::Continue
 }
 
+/// Get the base fee
 pub fn basefee<H: Handler>(runtime: &mut Runtime, _handler: &H) -> Control<H> {
 	push_u256!(runtime, U256::zero());
 
 	Control::Continue
 }
 
+/// Get execution origination address
 pub fn origin<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	let ret = H256::from(handler.origin());
 	push!(runtime, ret);
@@ -61,6 +68,7 @@ pub fn origin<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	Control::Continue
 }
 
+/// Get caller address
 pub fn caller<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	let ret = H256::from(runtime.context.caller);
 	push!(runtime, ret);
@@ -68,6 +76,7 @@ pub fn caller<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	Control::Continue
 }
 
+/// Get deposited value by the instruction/transaction responsible for this execution
 pub fn callvalue<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	let mut ret = H256::default();
 	runtime.context.apparent_value.to_big_endian(&mut ret[..]);
@@ -76,6 +85,7 @@ pub fn callvalue<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	Control::Continue
 }
 
+/// Get price of gas in current environment
 pub fn gasprice<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	let mut ret = H256::default();
 	handler.gas_price().to_big_endian(&mut ret[..]);
@@ -84,6 +94,7 @@ pub fn gasprice<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	Control::Continue
 }
 
+/// Get size of an account’s code
 pub fn extcodesize<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop!(runtime, address);
 	push_u256!(runtime, handler.code_size(address.into()));
@@ -91,6 +102,7 @@ pub fn extcodesize<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H>
 	Control::Continue
 }
 
+/// Get hash of an account’s code
 pub fn extcodehash<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop!(runtime, address);
 	push!(runtime, handler.code_hash(address.into()));
@@ -98,6 +110,7 @@ pub fn extcodehash<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H>
 	Control::Continue
 }
 
+/// Copy an account’s code to memory
 pub fn extcodecopy<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop!(runtime, address);
 	pop_u256!(runtime, memory_offset, code_offset, len);
@@ -120,6 +133,7 @@ pub fn extcodecopy<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H>
 	Control::Continue
 }
 
+/// Get size of output data from the previous call from the current environment
 pub fn returndatasize<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	let size = U256::from(runtime.return_data_buffer.len());
 	push_u256!(runtime, size);
@@ -127,6 +141,7 @@ pub fn returndatasize<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	Control::Continue
 }
 
+/// Copy output data from the previous call to memory
 pub fn returndatacopy<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	pop_u256!(runtime, memory_offset, data_offset, len);
 
@@ -148,6 +163,7 @@ pub fn returndatacopy<H: Handler>(runtime: &mut Runtime) -> Control<H> {
 	}
 }
 
+/// Get the hash of one of the 256 most recent complete blocks
 pub fn blockhash<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop_u256!(runtime, number);
 	push!(runtime, handler.block_hash(number));
@@ -155,31 +171,37 @@ pub fn blockhash<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	Control::Continue
 }
 
+/// Get the block’s beneficiary address
 pub fn coinbase<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push!(runtime, handler.block_coinbase().into());
 	Control::Continue
 }
 
+/// Get the block’s timestamp
 pub fn timestamp<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push_u256!(runtime, handler.block_timestamp());
 	Control::Continue
 }
 
+/// Get the block’s number
 pub fn number<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push_u256!(runtime, handler.block_number());
 	Control::Continue
 }
 
+/// Get the block’s difficulty (PREVRANDAO)
 pub fn difficulty<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push_u256!(runtime, handler.block_difficulty());
 	Control::Continue
 }
 
+/// Get the block’s gas limit
 pub fn gaslimit<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push_u256!(runtime, handler.block_gas_limit());
 	Control::Continue
 }
 
+/// Load word from storage
 pub fn sload<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop_u256!(runtime, index);
 	let value = handler.storage(runtime.context.address, index);
@@ -188,6 +210,7 @@ pub fn sload<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	Control::Continue
 }
 
+/// Save word to storage
 pub fn sstore<H: Handler>(runtime: &mut Runtime, handler: &mut H) -> Control<H> {
 	pop_u256!(runtime, index, value);
 
@@ -197,6 +220,7 @@ pub fn sstore<H: Handler>(runtime: &mut Runtime, handler: &mut H) -> Control<H> 
 	}
 }
 
+/// Load word from transient storage
 pub fn tload<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	pop_u256!(runtime, index);
 	let value = handler.transient_storage(runtime.context.address, index);
@@ -205,6 +229,7 @@ pub fn tload<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	Control::Continue
 }
 
+/// Save word to transient storage
 pub fn tstore<H: Handler>(runtime: &mut Runtime, handler: &mut H) -> Control<H> {
 	pop_u256!(runtime, index, value);
 
@@ -214,12 +239,16 @@ pub fn tstore<H: Handler>(runtime: &mut Runtime, handler: &mut H) -> Control<H> 
 	}
 }
 
+/// Get the amount of available gas, including the corresponding reduction for the cost of
+/// this instruction
 pub fn gas<H: Handler>(runtime: &mut Runtime, handler: &H) -> Control<H> {
 	push_u256!(runtime, handler.gas_left());
 
 	Control::Continue
 }
 
+
+/// Append log record
 pub fn log<H: Handler>(runtime: &mut Runtime, n: u8, handler: &mut H) -> Control<H> {
 	pop_u256!(runtime, offset, len);
 	let offset = as_usize_or_fail!(offset);
@@ -246,6 +275,7 @@ pub fn log<H: Handler>(runtime: &mut Runtime, n: u8, handler: &mut H) -> Control
 	}
 }
 
+// Halt execution and register account for later deletion or send all Ether to address (post-Cancun)
 pub fn suicide<H: Handler>(runtime: &mut Runtime, handler: &mut H) -> Control<H> {
 	pop!(runtime, target);
 
@@ -257,6 +287,7 @@ pub fn suicide<H: Handler>(runtime: &mut Runtime, handler: &mut H) -> Control<H>
 	Control::Exit(ExitSucceed::Suicided.into())
 }
 
+/// Create a new account with associated code
 pub fn create<H: Handler>(
 	runtime: &mut Runtime,
 	is_create2: bool,
@@ -302,6 +333,7 @@ pub fn create<H: Handler>(
 	}
 }
 
+/// Message-call into an account
 pub fn call<'config, H: Handler>(
 	runtime: &mut Runtime,
 	scheme: CallScheme,

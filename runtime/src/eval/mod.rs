@@ -5,7 +5,7 @@ mod system;
 pub use system::{save_return_value, save_created_address};
 use crate::{Handler, Runtime, ExitReason, CallScheme, Opcode};
 
-/// ...
+/// continue the execution / spawn next frame / exit to previous frame
 pub enum Control<H: Handler> {
 	/// ...
 	Continue,
@@ -17,6 +17,7 @@ pub enum Control<H: Handler> {
 	Exit(ExitReason)
 }
 
+/// handler for unknown opcode
 fn handle_other<H: Handler>(state: &mut Runtime, opcode: Opcode, handler: &mut H) -> Control<H> {
 	match handler.other(
 		opcode,
@@ -27,6 +28,7 @@ fn handle_other<H: Handler>(state: &mut Runtime, opcode: Opcode, handler: &mut H
 	}
 }
 
+/// process `external` opcodes
 pub fn eval<H: Handler>(state: &mut Runtime, opcode: Opcode, handler: &mut H) -> Control<H> {
 	match opcode {
 		Opcode::SHA3 => system::sha3(state, handler),

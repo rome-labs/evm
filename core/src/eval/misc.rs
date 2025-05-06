@@ -2,12 +2,14 @@ use core::cmp::{min, max};
 use super::Control;
 use crate::{Machine, ExitError, ExitSucceed, ExitFatal, ExitRevert, H256, U256};
 
+/// Get size of code running in current environment
 pub fn codesize(state: &mut Machine) -> Control {
 	let size = U256::from(state.code.len());
 	push_u256!(state, size);
 	Control::Continue(1)
 }
 
+/// Copy code running in current environment to memory
 pub fn codecopy(state: &mut Machine) -> Control {
 	pop_u256!(state, memory_offset, code_offset, len);
 
@@ -22,6 +24,7 @@ pub fn codecopy(state: &mut Machine) -> Control {
 	}
 }
 
+/// Get input data of current environment
 pub fn calldataload(state: &mut Machine) -> Control {
 	pop_u256!(state, index);
 
@@ -37,12 +40,14 @@ pub fn calldataload(state: &mut Machine) -> Control {
 	Control::Continue(1)
 }
 
+/// Get size of input data in current environment
 pub fn calldatasize(state: &mut Machine) -> Control {
 	let len = U256::from(state.data.len());
 	push_u256!(state, len);
 	Control::Continue(1)
 }
 
+/// Copy input data in current environment to memory
 pub fn calldatacopy(state: &mut Machine) -> Control {
 	pop_u256!(state, memory_offset, data_offset, len);
 
@@ -61,11 +66,13 @@ pub fn calldatacopy(state: &mut Machine) -> Control {
 	}
 }
 
+/// Remove item from stack
 pub fn pop(state: &mut Machine) -> Control {
 	pop_u256!(state, _val);
 	Control::Continue(1)
 }
 
+/// Load word from memory
 pub fn mload(state: &mut Machine) -> Control {
 	pop_u256!(state, index);
 	let index = as_usize_or_fail!(index);
@@ -75,6 +82,7 @@ pub fn mload(state: &mut Machine) -> Control {
 	Control::Continue(1)
 }
 
+/// Save word to memory
 pub fn mstore(state: &mut Machine) -> Control {
 	pop_u256!(state, index);
 	pop!(state, value);
@@ -86,6 +94,7 @@ pub fn mstore(state: &mut Machine) -> Control {
 	}
 }
 
+/// Copy memory areas
 pub fn mcopy(state: &mut Machine) -> Control {
 	pop_u256!(state, dst_offset, src_offset, size);
 
@@ -102,6 +111,7 @@ pub fn mcopy(state: &mut Machine) -> Control {
 	}
 }
 
+/// Save byte to memory
 pub fn mstore8(state: &mut Machine) -> Control {
 	pop_u256!(state, index, value);
 	let index = as_usize_or_fail!(index);
@@ -114,6 +124,7 @@ pub fn mstore8(state: &mut Machine) -> Control {
 	}
 }
 
+/// Alter the program counter
 pub fn jump(state: &mut Machine) -> Control {
 	pop_u256!(state, dest);
 	let dest = as_usize_or_fail!(dest, ExitError::InvalidJump);
@@ -125,6 +136,7 @@ pub fn jump(state: &mut Machine) -> Control {
 	}
 }
 
+/// Conditionally alter the program counter
 pub fn jumpi(state: &mut Machine) -> Control {
 	pop_u256!(state, dest, value);
 	let dest = as_usize_or_fail!(dest, ExitError::InvalidJump);
@@ -140,16 +152,19 @@ pub fn jumpi(state: &mut Machine) -> Control {
 	}
 }
 
+/// Get the value of the program counter prior to the increment corresponding to this instruction
 pub fn pc(state: &mut Machine, position: usize) -> Control {
 	push_u256!(state, U256::from(position));
 	Control::Continue(1)
 }
 
+/// Get the size of active memory in bytes
 pub fn msize(state: &mut Machine) -> Control {
 	push_u256!(state, U256::from(state.memory.effective_len()));
 	Control::Continue(1)
 }
 
+/// Place byte item on a stack
 pub fn push(state: &mut Machine, n: usize, position: usize) -> Control {
 	let end = min(position + 1 + n, state.code.len());
 	let val = U256::from_big_endian_fast(&state.code[(position + 1)..end]);
@@ -158,11 +173,13 @@ pub fn push(state: &mut Machine, n: usize, position: usize) -> Control {
 	Control::Continue(1 + n)
 }
 
+/// Place value 0 on stack
 pub fn push0(state: &mut Machine) -> Control {
 	push_u256!(state, U256::zero());
 	Control::Continue(1)
 }
 
+/// Duplicate stack item
 pub fn dup(state: &mut Machine, n: usize) -> Control {
 	if let Err(e) = state.stack.dup(n - 1) {
 		return Control::Exit(e.into());
@@ -171,6 +188,7 @@ pub fn dup(state: &mut Machine, n: usize) -> Control {
 	Control::Continue(1)
 }
 
+// Exchange stack items
 pub fn swap(state: &mut Machine, n: usize) -> Control {
 	if let Err(e) = state.stack.swap(n) {
 		return Control::Exit(e.into());
@@ -179,6 +197,7 @@ pub fn swap(state: &mut Machine, n: usize) -> Control {
 	Control::Continue(1)
 }
 
+/// Halt execution returning output data
 pub fn ret(state: &mut Machine) -> Control {
 	pop_u256!(state, start, len);
 	let start = as_usize_or_fail!(start);
@@ -188,6 +207,7 @@ pub fn ret(state: &mut Machine) -> Control {
 	Control::Exit(ExitSucceed::Returned.into())
 }
 
+/// Halt execution reverting state changes but returning data and remaining gas
 pub fn revert(state: &mut Machine) -> Control {
 	pop_u256!(state, start, len);
 	let start = as_usize_or_fail!(start);
