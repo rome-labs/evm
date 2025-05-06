@@ -18,7 +18,10 @@ mod eval;
 mod interrupt;
 mod handler;
 
-pub use evm_core::*;
+pub use evm_core::{
+	Machine, Transfer, ExitReason, Context, Capture, Stack, ExitError, CreateScheme, CallScheme,
+	ExitSucceed, ExitFatal, H160, H256, U256, Opcode,
+};
 
 pub use crate::interrupt::{Resolve, ResolveCall, ResolveCreate};
 pub use crate::handler::Handler;

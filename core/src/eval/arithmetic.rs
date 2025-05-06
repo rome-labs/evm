@@ -79,7 +79,7 @@ pub fn exp(op1: U256, op2: U256) -> U256 {
 }
 
 pub fn signextend(op1: U256, op2: U256) -> U256 {
-	if op1 > U256::from(32) {
+	if op1 >= U256::from(32) {
 		op2
 	} else {
 		let mut ret = U256::zero();

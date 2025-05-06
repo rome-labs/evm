@@ -29,6 +29,7 @@ pub enum ExitReason {
 	Revert(ExitRevert),
 	/// Machine encountered an error that is not supposed to be normal EVM
 	/// errors, such as requiring too much memory to execute.
+
 	Fatal(ExitFatal),
 }
 
