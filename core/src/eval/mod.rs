@@ -1,3 +1,5 @@
+/// implementation of the non-external opcodes
+
 #[macro_use]
 mod macros;
 mod arithmetic;
@@ -455,6 +457,7 @@ fn eval_external(_state: &mut Machine, opcode: Opcode, _position: usize) -> Cont
 	Control::Trap(opcode)
 }
 
+/// process non-external opcodes
 #[allow(clippy::too_many_lines)]
 pub fn eval(state: &mut Machine, opcode: Opcode, position: usize) -> Control {
 	static TABLE: [fn(state: &mut Machine, opcode: Opcode, position: usize) -> Control; 256] = {

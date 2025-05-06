@@ -1,6 +1,7 @@
 use alloc::vec::Vec;
 use crate::{ExitError, H256, U256};
 
+/// serialization/deserialization of the Stack
 #[cfg(feature = "with-serde")]
 mod serde_vec_u256 {
 	use serde::{Serializer, Deserializer, de};

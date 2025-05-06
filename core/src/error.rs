@@ -29,6 +29,7 @@ pub enum ExitReason {
 	Revert(ExitRevert),
 	/// Machine encountered an error that is not supposed to be normal EVM
 	/// errors, such as requiring too much memory to execute.
+
 	Fatal(ExitFatal),
 }
 
@@ -55,6 +56,12 @@ impl ExitReason {
 	#[must_use]
 	pub const fn is_fatal(&self) -> bool {
 		matches!(self, Self::Fatal(_))
+	}
+
+	/// Whether the step limit has been reached.
+	#[must_use]
+	pub const fn is_step_limit(&self) -> bool {
+		matches!(self, Self::StepLimitReached)
 	}
 }
 
