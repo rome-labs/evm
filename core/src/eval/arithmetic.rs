@@ -82,20 +82,17 @@ pub fn signextend(op1: U256, op2: U256) -> U256 {
 	if op1 >= U256::from(32) {
 		op2
 	} else {
-		let mut ret = U256::zero();
-		let len: usize = op1.as_usize();
-		let t: usize = 8 * (len + 1) - 1;
-		let t_bit_mask = U256::one() << t;
-		let t_value = (op2 & t_bit_mask) >> t;
-		for i in 0..256 {
-			let bit_mask = U256::one() << i;
-			let i_value = (op2 & bit_mask) >> i;
-			if i <= t {
-				ret = ret.overflowing_add(i_value << i).0;
-			} else {
-				ret = ret.overflowing_add(t_value << i).0;
-			}
+		let byte_index = op1.as_usize();
+		let bit_index = 8 * byte_index + 7;
+
+		if op2.bit(bit_index) {
+			// Sign bit is 1 → extend with 1s
+			let mask = U256::MAX << (bit_index + 1);
+			op2 | mask
+		} else {
+			// Sign bit is 0 → zero out upper bits
+			let mask = (U256::one() << (bit_index + 1)) - 1;
+			op2 & mask
 		}
-		ret
 	}
 }

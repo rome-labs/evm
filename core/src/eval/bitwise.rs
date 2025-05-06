@@ -38,19 +38,14 @@ pub fn not(op1: U256) -> U256 {
 }
 
 pub fn byte(op1: U256, op2: U256) -> U256 {
-	let mut ret = U256::zero();
-
-	for i in 0..256 {
-		if i < 8 && op1 < 32.into() {
-			let o: usize = op1.as_usize();
-			let t = 255 - (7 - i + 8 * o);
-			let bit_mask = U256::one() << t;
-			let value = (op2 & bit_mask) >> t;
-			ret = ret.overflowing_add(value << i).0;
-		}
+	let i = op1.as_usize();
+	if i >= 32 {
+		U256::zero()
+	} else {
+		let mut buf = [0u8; 32];
+		op2.to_big_endian(&mut buf);
+		U256::from(buf[i])
 	}
-
-	ret
 }
 
 pub fn shl(shift: U256, value: U256) -> U256 {
