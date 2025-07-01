@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 use crate::{Capture, Stack, ExitError, Opcode,
 			Machine, ExitReason,
 			H160, H256, U256};
-use evm_core::{Context, CreateScheme, Transfer};
+use evm_core::{Context, CreateScheme, ExitFatal, Transfer};
 
 /// EVM context handler.
 pub trait Handler {
@@ -108,7 +108,5 @@ pub trait Handler {
 		&mut self,
 		_opcode: Opcode,
 		_stack: &mut Machine
-	) -> Result<(), ExitError> {
-		Err(ExitError::OutOfGas)
-	}
+	) -> Result<(), ExitFatal>;
 }
