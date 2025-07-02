@@ -98,10 +98,12 @@ impl Memory {
 		if offset >= self.data.len() {
 			return ret;
 		}
-		let end = match offset.checked_add(size) {
-			Some(end) => min(end, self.data.len()),
-			None => return ret
-		};
+
+		if offset.checked_add(size).map_or(true, |pos| pos > self.limit) {
+			return ret
+		}
+
+		let end = min(offset + size, self.data.len());
 
 		(&mut ret[0..(end - offset)]).copy_from_slice(&self.data[offset..end]);
 
@@ -123,8 +125,10 @@ impl Memory {
 			return Err(ExitFatal::NotSupported)
 		}
 
-		if self.data.len() < offset + target_size {
-			self.data.resize(offset + target_size, 0);
+		let len = offset + target_size;
+		if self.data.len() < len {
+			self.data.resize(len, 0);
+			self.effective_len = max(self.effective_len, len);
 		}
 
 		let data = &mut self.data[offset..(offset + target_size)];

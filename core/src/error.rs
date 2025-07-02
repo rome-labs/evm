@@ -29,6 +29,7 @@ pub enum ExitReason {
 	Revert(ExitRevert),
 	/// Machine encountered an error that is not supposed to be normal EVM
 	/// errors, such as requiring too much memory to execute.
+
 	Fatal(ExitFatal),
 }
 
@@ -55,6 +56,12 @@ impl ExitReason {
 	#[must_use]
 	pub const fn is_fatal(&self) -> bool {
 		matches!(self, Self::Fatal(_))
+	}
+
+	/// Whether the step limit has been reached.
+	#[must_use]
+	pub const fn is_step_limit(&self) -> bool {
+		matches!(self, Self::StepLimitReached)
 	}
 }
 
@@ -132,8 +139,6 @@ pub enum ExitError {
 
 	/// Indicates that a STATICCALL tried to change state
 	StaticModeViolation,
-	/// unknown EVM opcode
-	IncompatibleVersionEVM(u8),
 	/// extern call error
 	ExtCallError,
 	/// transfer is not allowed
@@ -160,6 +165,17 @@ pub enum ExitFatal {
 	UnhandledInterrupt,
 	/// The environment explicitly set call errors as fatal error.
 	CallErrorAsFatal(ExitError),
+	/// unknown EVM opcode
+	IncompatibleVersionEVM(u8),
+	/// transfer is prohibited for non-evm call
+	TransferProhibited,
+	/// non-evm EthCall error
+	NonEvmCallError,
+	/// non-evm StaticModeViolation
+	NonEvmStaticModeViolation,
+	/// delegate call is prohibited for non-evm call
+	DelegateCallProhibited,
+
 }
 
 impl From<ExitFatal> for ExitReason {

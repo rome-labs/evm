@@ -2,6 +2,7 @@ use core::ops::Rem;
 use core::convert::TryInto;
 use crate::{utils::I256, U256, U512};
 
+/// Integer division operation
 pub fn div(op1: U256, op2: U256) -> U256 {
 	if op2 == U256::zero() {
 		U256::zero()
@@ -10,6 +11,7 @@ pub fn div(op1: U256, op2: U256) -> U256 {
 	}
 }
 
+/// Signed integer division operation (truncated)
 pub fn sdiv(op1: U256, op2: U256) -> U256 {
 	let op1: I256 = op1.into();
 	let op2: I256 = op2.into();
@@ -17,6 +19,7 @@ pub fn sdiv(op1: U256, op2: U256) -> U256 {
 	ret.into()
 }
 
+/// Modulo remainder operation
 pub fn rem(op1: U256, op2: U256) -> U256 {
 	if op2 == U256::zero() {
 		U256::zero()
@@ -25,6 +28,7 @@ pub fn rem(op1: U256, op2: U256) -> U256 {
 	}
 }
 
+/// Signed modulo remainder operation
 pub fn srem(op1: U256, op2: U256) -> U256 {
 	if op2 == U256::zero() {
 		U256::zero()
@@ -36,6 +40,7 @@ pub fn srem(op1: U256, op2: U256) -> U256 {
 	}
 }
 
+/// Modulo addition operation
 pub fn addmod(op1: U256, op2: U256, op3: U256) -> U256 {
 	let op1: U512 = op1.into();
 	let op2: U512 = op2.into();
@@ -49,6 +54,7 @@ pub fn addmod(op1: U256, op2: U256, op3: U256) -> U256 {
 	}
 }
 
+/// Modulo multiplication operation
 pub fn mulmod(op1: U256, op2: U256, op3: U256) -> U256 {
 	let op1: U512 = op1.into();
 	let op2: U512 = op2.into();
@@ -62,6 +68,7 @@ pub fn mulmod(op1: U256, op2: U256, op3: U256) -> U256 {
 	}
 }
 
+/// Exponential operation
 pub fn exp(op1: U256, op2: U256) -> U256 {
 	let mut op1 = op1;
 	let mut op2 = op2;
@@ -78,24 +85,22 @@ pub fn exp(op1: U256, op2: U256) -> U256 {
 	r
 }
 
+/// Extend length of two’s complement signed integer
 pub fn signextend(op1: U256, op2: U256) -> U256 {
-	if op1 > U256::from(32) {
+	if op1 >= U256::from(32) {
 		op2
 	} else {
-		let mut ret = U256::zero();
-		let len: usize = op1.as_usize();
-		let t: usize = 8 * (len + 1) - 1;
-		let t_bit_mask = U256::one() << t;
-		let t_value = (op2 & t_bit_mask) >> t;
-		for i in 0..256 {
-			let bit_mask = U256::one() << i;
-			let i_value = (op2 & bit_mask) >> i;
-			if i <= t {
-				ret = ret.overflowing_add(i_value << i).0;
-			} else {
-				ret = ret.overflowing_add(t_value << i).0;
-			}
+		let byte_index = op1.as_usize();
+		let bit_index = 8 * byte_index + 7;
+
+		if op2.bit(bit_index) {
+			// Sign bit is 1 → extend with 1s
+			let mask = U256::MAX << (bit_index + 1);
+			op2 | mask
+		} else {
+			// Sign bit is 0 → zero out upper bits
+			let mask = (U256::one() << (bit_index + 1)) - 1;
+			op2 & mask
 		}
-		ret
 	}
 }

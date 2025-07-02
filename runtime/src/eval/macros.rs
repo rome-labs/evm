@@ -1,3 +1,4 @@
+/// check the value
 macro_rules! try_or_fail {
 	( $e:expr ) => {
 		match $e {
@@ -7,6 +8,7 @@ macro_rules! try_or_fail {
 	}
 }
 
+// try to pop a H256 from stack
 macro_rules! pop {
 	( $machine:expr, $( $x:ident ),* ) => (
 		$(
@@ -18,6 +20,8 @@ macro_rules! pop {
 	);
 }
 
+
+// try to pop a U256 from stack
 macro_rules! pop_u256 {
 	( $machine:expr, $( $x:ident ),* ) => (
 		$(
@@ -29,6 +33,7 @@ macro_rules! pop_u256 {
 	);
 }
 
+/// try to push H256 to the stack
 macro_rules! push {
 	( $machine:expr, $( $x:expr ),* ) => (
 		$(
@@ -40,6 +45,7 @@ macro_rules! push {
 	)
 }
 
+/// try to push U256 to the stack
 macro_rules! push_u256 {
 	( $machine:expr, $( $x:expr ),* ) => (
 		$(
@@ -51,6 +57,7 @@ macro_rules! push_u256 {
 	)
 }
 
+/// cast to usize
 macro_rules! as_usize_or_fail {
 	( $v:expr ) => {
 		{

@@ -16,4 +16,3 @@ extern crate alloc;
 pub use evm_core::*;
 pub use evm_runtime::*;
 
-pub mod backend;
